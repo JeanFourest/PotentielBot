@@ -57,6 +57,8 @@ client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
   const { commandName } = interaction;
 
+  if (interaction.replied && interaction.deferred) return;
+
   switch (commandName) {
     case "ping":
       await pingContent(interaction);

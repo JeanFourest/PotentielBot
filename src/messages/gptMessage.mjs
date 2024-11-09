@@ -15,16 +15,17 @@ export const gptMessage = async (message, client) => {
 
       // If the content is not empty, treat it as a question
       if (content.length >= 0) {
-        const gptResponses = await gptCompletion(content);
+        const imageAttachments = message.attachments
+          ? message.attachments
+          : undefined;
 
-        console.log(gptResponses)
+        const gptResponses = await gptCompletion(content, imageAttachments);
 
         gptResponses.forEach(async (parts) => {
           await message.reply({
             embeds: [embedContructor(parts)],
           });
         });
-
       } else {
         await message.reply({
           embeds: [embedContructor("Hello! What would you like to ask?")],
@@ -33,7 +34,7 @@ export const gptMessage = async (message, client) => {
     }
   } catch (e) {
     console.error("Error with gptMessage", e);
-    await interaction.reply({
+    await message.reply({
       embeds: [
         embedContructor(
           "An error occurred while trying to interact with Potentiel."

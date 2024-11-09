@@ -1,14 +1,16 @@
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-const {
-  Client,
-  GatewayIntentBits,
-  SlashCommandBuilder,
-  EmbedBuilder,
-} = require("discord.js");
+const { Client, GatewayIntentBits } = require("discord.js");
 require("dotenv").config();
-import { gptCompletion } from "./services/openai.mjs";
-import { gptGenerateImage } from "./services/generateImage.mjs";
+import { pingCommand, pingContent } from "./commands/pings.mjs";
+import {
+  createImageCommand,
+  createImageContent,
+} from "./commands/create_image.mjs";
+import { gptMessage } from "./messages/gptMessage.mjs";
+import { joinVoiceCommand, joinVoiceContent } from "./commands/join_voice.mjs";
+import { helpCommand, helpContent } from "./commands/help.mjs";
+import { playMusicCommand } from "./commands/play_music.mjs";
 
 // Create a new client instance
 const client = new Client({
@@ -16,44 +18,33 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildVoiceStates,
   ],
 });
 
 const token = process.env.TOKEN || "";
 
+const commandDefinitions = [
+  pingCommand.toJSON(),
+  createImageCommand.toJSON(),
+  joinVoiceCommand.toJSON(),
+  helpCommand.toJSON(),
+  playMusicCommand.toJSON(),
+];
+
 // When the bot is ready, run this code
 client.once("ready", async () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
-  const commands = await client.application.commands.fetch();
-
+  let commands;
   try {
-    if (
-      !commands.some(
-        (cmd) => cmd.name === "ping" || cmd.name === "create_image"
-      )
-    ) {
-      client.application.commands.create(
-        new SlashCommandBuilder()
-          .setName("ping")
-          .setDescription("Ask a question to the bot")
-      );
-
-      client.application.commands.create(
-        new SlashCommandBuilder()
-          .setName("create_image")
-          .setDescription("Generate an image")
-          .addStringOption((option) =>
-            option
-              .setName("description")
-              .setDescription("A description for the image")
-              .setRequired(true)
-          )
-      );
-    }
-  } catch (error) {
-    console.error("Error registering commands:", error);
+    commands = await client.application.commands.set(commandDefinitions);
+  } catch (e) {
+    console.error(e);
   }
+
+  console.log("Available commands:");
+  commands.forEach((command) => console.log(`/${command.name}`));
 });
 
 // commands
@@ -61,57 +52,31 @@ client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
   const { commandName } = interaction;
 
-  if (commandName === "ping") {
-    await interaction.reply("Pong! The bot is alive!");
-  }
+  switch (commandName) {
+    case "ping":
+      await pingContent(interaction);
+      break;
 
-  if (commandName === "create_image") {
-    const description = interaction.options.getString("description");
+    case "create_image":
+      await createImageContent(interaction);
+      break;
 
-    await interaction.deferReply();
+    case "join_voice":
+      await joinVoiceContent(interaction);
+      break;
 
-    if (description.length < 1900) {
-      try {
-        const imageUrl = await gptGenerateImage(description);
-        await interaction.editReply({ content: imageUrl });
-      } catch (error) {
-        console.error("Error generating image:", error);
-        await interaction.editReply({
-          content: "There was an error generating the image.",
-        });
-      }
-    } else {
-      await interaction.editReply("Too many characters in the description.");
-    }
+    case "help":
+      await helpContent(interaction, client);
+      break;
+
+    default:
+      break;
   }
 });
 
 client.on("messageCreate", async (message) => {
-  // Ignore messages sent by the bot itself
-  if (message.author.bot) return;
-
-  // Check if the bot is mentioned in the message
-  if (message.mentions.has(client.user)) {
-    // Get the content of the message after the mention
-    const content = message.content.replace(`<@${client.user.id}>`, "").trim();
-
-    // If the content is not empty, treat it as a question
-    if (content.length >= 0) {
-      const gptResponse = await gptCompletion(content);
-
-      await message.reply({
-        embeds: [new EmbedBuilder().setDescription(gptResponse).setTimestamp()],
-      });
-    } else {
-      await message.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setDescription("Hello! What would you like to ask?")
-            .setTimestamp(),
-        ],
-      });
-    }
-  }
+  // potentiel answers user questions
+  await gptMessage(message, client);
 });
 
 // Login to Discord with your app's token

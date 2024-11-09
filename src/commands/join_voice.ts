@@ -1,18 +1,33 @@
-import { joinVoiceChannel } from "@discordjs/voice";
-import { SlashCommandBuilder } from "discord.js";
-import { embedContructor } from "../messages/gptMessage.mjs";
+import {
+  DiscordGatewayAdapterCreator,
+  joinVoiceChannel,
+} from "@discordjs/voice";
+import {
+  CommandInteraction,
+  GuildMember,
+  SlashCommandBuilder,
+} from "discord.js";
+import { embedContructor } from "../messages/gptMessage.js";
 
 export const joinVoiceCommand = new SlashCommandBuilder()
   .setName("join_voice")
   .setDescription("Potentiel will join the voice call");
 
-export const joinVoiceContent = async (interaction) => {
+export const joinVoiceContent = async (interaction: CommandInteraction) => {
   try {
-    if (interaction.member.voice.channel) {
+    if (!interaction.member || !interaction.guild) return;
+
+    const guild = interaction.guild;
+    const member = interaction.member as GuildMember;
+
+    const voice = member.voice;
+
+    if (voice.channel) {
       joinVoiceChannel({
-        channelId: interaction.member.voice.channel.id,
-        guildId: interaction.guild.id,
-        adapterCreator: interaction.guild.voiceAdapterCreator,
+        channelId: voice.channel.id,
+        guildId: guild.id,
+        adapterCreator:
+          guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
         selfDeaf: false,
       });
       await interaction.reply({

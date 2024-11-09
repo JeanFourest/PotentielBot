@@ -1,17 +1,20 @@
-import { EmbedBuilder } from "discord.js";
-import { gptCompletion } from "../services/openai.mjs";
+import { Client, EmbedBuilder, Message } from "discord.js";
+import { gptCompletion } from "../services/openai.js";
 
-export const gptMessage = async (message, client) => {
+export const gptMessage = async (message: Message, client: Client) => {
   try {
+    const user = client.user;
+
+    // check if user exists
+    if (!user) return;
+
     // Ignore messages sent by the bot itself
     if (message.author.bot) return;
 
     // Check if the bot is mentioned in the message
-    if (message.mentions.has(client.user)) {
+    if (message.mentions.has(user)) {
       // Get the content of the message after the mention
-      const content = message.content
-        .replace(`<@${client.user.id}>`, "")
-        .trim();
+      const content = message.content.replace(`<@${user.id}>`, "").trim();
 
       // If the content is not empty, treat it as a question
       if (content.length >= 0) {
@@ -20,6 +23,8 @@ export const gptMessage = async (message, client) => {
           : undefined;
 
         const gptResponses = await gptCompletion(content, imageAttachments);
+
+        if (!gptResponses) return;
 
         gptResponses.forEach(async (parts) => {
           await message.reply({
@@ -44,6 +49,6 @@ export const gptMessage = async (message, client) => {
   }
 };
 
-export const embedContructor = (description) => {
+export const embedContructor = (description: string) => {
   return new EmbedBuilder().setDescription(description).setTimestamp();
 };

@@ -2,7 +2,6 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 import OpenAI from "openai";
 require("dotenv").config();
-import { catGirl } from "../personalities/catgirl.mjs";
 
 const openai = new OpenAI({
   apiKey: process.env.OPEN_AI_TOKEN || "",

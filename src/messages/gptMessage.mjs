@@ -15,11 +15,16 @@ export const gptMessage = async (message, client) => {
 
       // If the content is not empty, treat it as a question
       if (content.length >= 0) {
-        const gptResponse = await gptCompletion(content);
+        const gptResponses = await gptCompletion(content);
 
-        await message.reply({
-          embeds: [embedContructor(gptResponse)],
+        console.log(gptResponses)
+
+        gptResponses.forEach(async (parts) => {
+          await message.reply({
+            embeds: [embedContructor(parts)],
+          });
         });
+
       } else {
         await message.reply({
           embeds: [embedContructor("Hello! What would you like to ask?")],

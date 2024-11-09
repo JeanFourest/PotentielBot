@@ -11,6 +11,10 @@ import { gptMessage } from "./messages/gptMessage.mjs";
 import { joinVoiceCommand, joinVoiceContent } from "./commands/join_voice.mjs";
 import { helpCommand, helpContent } from "./commands/help.mjs";
 import { playMusicCommand } from "./commands/play_music.mjs";
+import {
+  leaveVoiceCommand,
+  leaveVoiceContent,
+} from "./commands/leave_voice.mjs";
 
 // Create a new client instance
 const client = new Client({
@@ -28,6 +32,7 @@ const commandDefinitions = [
   pingCommand.toJSON(),
   createImageCommand.toJSON(),
   joinVoiceCommand.toJSON(),
+  leaveVoiceCommand.toJSON(),
   helpCommand.toJSON(),
   playMusicCommand.toJSON(),
 ];
@@ -64,6 +69,9 @@ client.on("interactionCreate", async (interaction) => {
     case "join_voice":
       await joinVoiceContent(interaction);
       break;
+
+    case "leave_voice":
+      await leaveVoiceContent(interaction);
 
     case "help":
       await helpContent(interaction, client);

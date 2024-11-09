@@ -10,7 +10,6 @@ import {
 import { gptMessage } from "./messages/gptMessage.mjs";
 import { joinVoiceCommand, joinVoiceContent } from "./commands/join_voice.mjs";
 import { helpCommand, helpContent } from "./commands/help.mjs";
-import { playMusicCommand } from "./commands/play_music.mjs";
 import {
   leaveVoiceCommand,
   leaveVoiceContent,
@@ -34,7 +33,6 @@ const commandDefinitions = [
   joinVoiceCommand.toJSON(),
   leaveVoiceCommand.toJSON(),
   helpCommand.toJSON(),
-  playMusicCommand.toJSON(),
 ];
 
 // When the bot is ready, run this code

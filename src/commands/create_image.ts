@@ -1,6 +1,6 @@
-import { SlashCommandBuilder } from "discord.js";
-import { gptGenerateImage } from "../services/generateImage.mjs";
-import { embedContructor } from "../messages/gptMessage.mjs";
+import { CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { gptGenerateImage } from "../services/generateImage.js";
+import { embedContructor } from "../messages/gptMessage.js";
 
 export const createImageCommand = new SlashCommandBuilder()
   .setName("create_image")
@@ -12,13 +12,14 @@ export const createImageCommand = new SlashCommandBuilder()
       .setRequired(true)
   );
 
-export const createImageContent = async (interaction) => {
+export const createImageContent = async (interaction: CommandInteraction) => {
   try {
-    const description = interaction.options.getString("description");
+    const description: any = interaction.options.get("description")?.value;
 
     await interaction.deferReply();
 
     const imageUrl = await gptGenerateImage(description);
+    if (!imageUrl) return;
     await interaction.editReply(imageUrl);
   } catch (e) {
     console.error("Error generating image:", e);

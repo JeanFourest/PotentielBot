@@ -1,15 +1,18 @@
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
 import OpenAI from "openai";
-import { getUserPrompt } from "../utils.mjs";
-require("dotenv").config();
+import { getUserPrompt } from "../utils.js";
+import dotenv from "dotenv";
+import { Attachment, Collection } from "discord.js";
+dotenv.config();
 
 const openai = new OpenAI({
-  apiKey: process.env.OPEN_AI_TOKEN || "",
+  apiKey: process.env.OPEN_AI_TOKEN ?? "",
 });
 
-export const gptCompletion = async (prompt, images) => {
-  const userPrompt = getUserPrompt(prompt, images);
+export const gptCompletion = async (
+  prompt: string,
+  images: Collection<string, Attachment> | undefined
+) => {
+  const userPrompt: any = getUserPrompt(prompt, images);
 
   try {
     const completion = await openai.chat.completions.create({
@@ -24,6 +27,8 @@ export const gptCompletion = async (prompt, images) => {
     });
 
     let gptResponse = completion.choices[0].message.content;
+
+    if (!gptResponse) return;
 
     // Split the response into chunks of 1500 characters
     const chunkSize = 2000;

@@ -1,12 +1,16 @@
-import { SlashCommandBuilder } from "discord.js";
-import { embedContructor } from "../messages/gptMessage.mjs";
+import { Client, CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { embedContructor } from "../messages/gptMessage.js";
 
 export const helpCommand = new SlashCommandBuilder()
   .setName("help")
   .setDescription("Get list of commands");
 
-export const helpContent = async (interaction, client) => {
+export const helpContent = async (
+  interaction: CommandInteraction,
+  client: Client
+) => {
   try {
+    if (!client.application) return;
     const commands = await client.application.commands.fetch();
 
     const commandList = commands

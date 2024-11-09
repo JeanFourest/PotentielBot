@@ -1,4 +1,11 @@
-export const getUserPrompt = (prompt, images) => {
+import { Attachment, Collection } from "discord.js";
+
+export const getUserPrompt = (
+  prompt: string,
+  images: Collection<string, Attachment> | undefined
+) => {
+  if (!images) return;
+
   const promptImages = images.map((image) => {
     return {
       type: "image_url",

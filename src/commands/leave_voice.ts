@@ -1,14 +1,14 @@
 import { getVoiceConnection } from "@discordjs/voice";
-import { SlashCommandBuilder } from "discord.js";
-import { embedContructor } from "../messages/gptMessage.mjs";
+import { CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { embedContructor } from "../messages/gptMessage.js";
 
 export const leaveVoiceCommand = new SlashCommandBuilder()
   .setName("leave_voice")
   .setDescription("Potentiel will leave the voice call");
 
-export const leaveVoiceContent = async (interaction) => {
+export const leaveVoiceContent = async (interaction: CommandInteraction) => {
   try {
-    const guildId = interaction.guildId;
+    const guildId = interaction.guildId ?? "";
     const connection = getVoiceConnection(guildId);
 
     if (connection) {

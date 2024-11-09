@@ -13,23 +13,17 @@ export const createImageCommand = new SlashCommandBuilder()
   );
 
 export const createImageContent = async (interaction) => {
-  const description = interaction.options.getString("description");
+  try {
+    const description = interaction.options.getString("description");
 
-  await interaction.deferReply();
+    await interaction.deferReply();
 
-  if (description.length < 1900) {
-    try {
-      const imageUrl = await gptGenerateImage(description);
-      await interaction.editReply(imageUrl);
-    } catch (error) {
-      console.error("Error generating image:", error);
-      await interaction.editReply({
-        embeds: [embedContructor("There was an error generating the image.")],
-      });
-    }
-  } else {
+    const imageUrl = await gptGenerateImage(description);
+    await interaction.editReply(imageUrl);
+  } catch (e) {
+    console.error("Error generating image:", e);
     await interaction.editReply({
-      embeds: [embedContructor("Too many characters in the description.")],
+      embeds: [embedContructor("There was an error generating the image.")],
     });
   }
 };

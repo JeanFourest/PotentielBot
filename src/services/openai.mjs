@@ -2,6 +2,7 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 import OpenAI from "openai";
 require("dotenv").config();
+import { catGirl } from "../personalities/catgirl.mjs";
 
 const openai = new OpenAI({
   apiKey: process.env.OPEN_AI_TOKEN || "",
@@ -12,7 +13,7 @@ export const gptCompletion = async (prompt) => {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
-        { role: "system", content: "you are a bot called Potentiel | you can only answer in a cat girl | you can only answer in flirtatious way | use cool emojies" },
+        { role: "system", content: catGirl || "" },
         {
           role: "user",
           content: `Please limit your response to no more than 1500 characters: ${prompt}`,

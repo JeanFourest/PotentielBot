@@ -1,13 +1,16 @@
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 import OpenAI from "openai";
+import { getUserPrompt } from "../utils.mjs";
 require("dotenv").config();
 
 const openai = new OpenAI({
   apiKey: process.env.OPEN_AI_TOKEN || "",
 });
 
-export const gptCompletion = async (prompt) => {
+export const gptCompletion = async (prompt, images) => {
+  const userPrompt = getUserPrompt(prompt, images);
+
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -15,7 +18,7 @@ export const gptCompletion = async (prompt) => {
         { role: "system", content: "you are a bot called Potentiel" },
         {
           role: "user",
-          content: `${prompt}`,
+          content: userPrompt,
         },
       ],
     });
@@ -24,7 +27,6 @@ export const gptCompletion = async (prompt) => {
 
     // Split the response into chunks of 1500 characters
     const chunkSize = 2000;
-    let partNumber = 1;
 
     // Regular expression to match code blocks (enclosed by three backticks)
     const codeBlockRegex = /```[^`]*```/g;
@@ -42,19 +44,16 @@ export const gptCompletion = async (prompt) => {
       if (i < parts.length && parts[i]) {
         let part = parts[i];
         while (part.length > chunkSize) {
-          allParts.push(`part ${partNumber}:\n${part.substring(0, chunkSize)}`);
+          allParts.push(`${part.substring(0, chunkSize)}`);
           part = part.substring(chunkSize);
-          partNumber++;
         }
         if (part) {
-          allParts.push(`part ${partNumber}:\n${part}`);
-          partNumber++;
+          allParts.push(`\n${part}`);
         }
       }
 
       if (i < codeBlocks.length) {
-        allParts.push(`part ${partNumber}:\n${codeBlocks[i]}`);
-        partNumber++;
+        allParts.push(`${codeBlocks[i]}`);
       }
       i++;
     }

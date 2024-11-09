@@ -12,7 +12,7 @@ export const gptCompletion = async (prompt) => {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
-        { role: "system", content: "you are an assistant" },
+        { role: "system", content: "you are a bot called Potentiel" },
         {
           role: "user",
           content: `${prompt}`,

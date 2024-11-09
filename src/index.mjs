@@ -8,6 +8,9 @@ import {
   createImageContent,
 } from "./commands/create_image.mjs";
 import { gptMessage } from "./messages/gptMessage.mjs";
+import { joinVoiceCommand, joinVoiceContent } from "./commands/join_voice.mjs";
+import { helpCommand, helpContent } from "./commands/help.mjs";
+import { playMusicCommand } from "./commands/play_music.mjs";
 
 // Create a new client instance
 const client = new Client({
@@ -15,18 +18,33 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildVoiceStates,
   ],
 });
 
 const token = process.env.TOKEN || "";
 
+const commandDefinitions = [
+  pingCommand.toJSON(),
+  createImageCommand.toJSON(),
+  joinVoiceCommand.toJSON(),
+  helpCommand.toJSON(),
+  playMusicCommand.toJSON(),
+];
+
 // When the bot is ready, run this code
 client.once("ready", async () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
-  // commands
-  pingCommand;
-  createImageCommand;
+  let commands;
+  try {
+    commands = await client.application.commands.set(commandDefinitions);
+  } catch (e) {
+    console.error(e);
+  }
+
+  console.log("Available commands:");
+  commands.forEach((command) => console.log(`/${command.name}`));
 });
 
 // commands
@@ -41,6 +59,14 @@ client.on("interactionCreate", async (interaction) => {
 
     case "create_image":
       await createImageContent(interaction);
+      break;
+
+    case "join_voice":
+      await joinVoiceContent(interaction);
+      break;
+
+    case "help":
+      await helpContent(interaction, client);
       break;
 
     default:

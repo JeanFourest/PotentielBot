@@ -1,6 +1,7 @@
 import { getVoiceConnection } from "@discordjs/voice";
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { embedContructor } from "../messages/gptMessage.js";
+import { embedContructor } from "../utils/utils.ts";
+import { songQueue } from "./play_music.ts";
 
 export const leaveVoiceCommand = new SlashCommandBuilder()
   .setName("leave_voice")
@@ -12,6 +13,8 @@ export const leaveVoiceContent = async (interaction: CommandInteraction) => {
     const connection = getVoiceConnection(guildId);
 
     if (connection) {
+      songQueue[guildId] = [];
+
       connection.destroy();
       await interaction.reply({
         embeds: [embedContructor("Successfully left the voice channel.")],
@@ -23,12 +26,5 @@ export const leaveVoiceContent = async (interaction: CommandInteraction) => {
     }
   } catch (e) {
     console.error("Error leaving voice channel:", e);
-    await interaction.reply({
-      embeds: [
-        embedContructor(
-          "An error occurred while trying to leave the voice channel."
-        ),
-      ],
-    });
   }
 };

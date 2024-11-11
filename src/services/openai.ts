@@ -1,7 +1,10 @@
 import OpenAI from "openai";
-import { getUserPrompt } from "../utils.js";
+import { getUserPrompt } from "../utils/utils.js";
 import dotenv from "dotenv";
 import { Attachment, Collection } from "discord.js";
+import {
+  gurrenLagannBrigade,
+} from "../personalities/personalities.js";
 dotenv.config();
 
 const openai = new OpenAI({
@@ -18,7 +21,7 @@ export const gptCompletion = async (
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
-        { role: "system", content: "you are a bot called Potentiel" },
+        { role: "system", content: gurrenLagannBrigade },
         {
           role: "user",
           content: userPrompt,
@@ -65,6 +68,6 @@ export const gptCompletion = async (
 
     return allParts;
   } catch (e) {
-    console.error(e);
+    console.error("Error generating answer:", e);
   }
 };

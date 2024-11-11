@@ -1,4 +1,4 @@
-import { Attachment, Collection } from "discord.js";
+import { Attachment, Collection, EmbedBuilder } from "discord.js";
 
 export const getUserPrompt = (
   prompt: string,
@@ -20,4 +20,8 @@ export const getUserPrompt = (
       text: prompt,
     },
   ];
+};
+
+export const embedContructor = (description: string) => {
+  return new EmbedBuilder().setDescription(description).setTimestamp();
 };

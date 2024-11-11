@@ -1,5 +1,6 @@
-import { Client, EmbedBuilder, Message } from "discord.js";
+import { Client, Message } from "discord.js";
 import { gptCompletion } from "../services/openai.js";
+import { embedContructor } from "../utils/utils.ts";
 
 export const gptMessage = async (message: Message, client: Client) => {
   try {
@@ -47,8 +48,4 @@ export const gptMessage = async (message: Message, client: Client) => {
       ],
     });
   }
-};
-
-export const embedContructor = (description: string) => {
-  return new EmbedBuilder().setDescription(description).setTimestamp();
 };

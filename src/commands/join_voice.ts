@@ -1,4 +1,6 @@
 import {
+  createAudioPlayer,
+  createAudioResource,
   DiscordGatewayAdapterCreator,
   joinVoiceChannel,
 } from "@discordjs/voice";
@@ -7,7 +9,8 @@ import {
   GuildMember,
   SlashCommandBuilder,
 } from "discord.js";
-import { embedContructor } from "../messages/gptMessage.js";
+import { embedContructor } from "../utils/utils.ts";
+import ytdl from "@distube/ytdl-core";
 
 export const joinVoiceCommand = new SlashCommandBuilder()
   .setName("join_voice")
@@ -23,13 +26,24 @@ export const joinVoiceContent = async (interaction: CommandInteraction) => {
     const voice = member.voice;
 
     if (voice.channel) {
-      joinVoiceChannel({
+      const connection = joinVoiceChannel({
         channelId: voice.channel.id,
         guildId: guild.id,
         adapterCreator:
           guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
         selfDeaf: false,
+        selfMute: false,
       });
+
+      /* if (!connection) return;
+
+      const player = createAudioPlayer();
+      connection.subscribe(player);
+
+      const resource = createAudioResource("./rowrow.mp3");
+
+      player.play(resource); */
+
       await interaction.reply({
         embeds: [embedContructor("Joined the voice channel!")],
       });
@@ -40,12 +54,5 @@ export const joinVoiceContent = async (interaction: CommandInteraction) => {
     }
   } catch (e) {
     console.error("Error joining voice channel:", e);
-    await interaction.reply({
-      embeds: [
-        embedContructor(
-          "An error occurred while trying to join the voice channel."
-        ),
-      ],
-    });
   }
 };

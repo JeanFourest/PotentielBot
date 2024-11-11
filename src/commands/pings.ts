@@ -1,5 +1,5 @@
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { embedContructor } from "../messages/gptMessage.js";
+import { embedContructor } from "../utils/utils.ts";
 
 export const pingCommand = new SlashCommandBuilder()
   .setName("ping")
@@ -12,8 +12,5 @@ export const pingContent = async (interaction: CommandInteraction) => {
     });
   } catch (e) {
     console.error("Error running ping command:", e);
-    await interaction.reply({
-      embeds: [embedContructor("An error occurred while trying to ping.")],
-    });
   }
 };

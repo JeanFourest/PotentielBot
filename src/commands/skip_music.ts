@@ -1,9 +1,5 @@
-import {
-  CommandInteraction,
-  Guild,
-  SlashCommandBuilder,
-} from "discord.js";
-import { embedContructor } from "../utils/utils.ts";
+import { CommandInteraction, Guild, SlashCommandBuilder } from "discord.js";
+import { embedContructor, replyOrFollowUpEmbed } from "../utils/utils.ts";
 import { getVoiceConnection } from "@discordjs/voice";
 import { playNextSong, songQueue } from "./play_music.ts";
 
@@ -18,15 +14,15 @@ export const skipMusicContent = async (interaction: CommandInteraction) => {
     const connection = getVoiceConnection(guild.id);
 
     if (!connection) {
-      await interaction.reply({
-        embeds: [embedContructor("I'm not currently in a voice channel.")],
+      await replyOrFollowUpEmbed(interaction, {
+        description: "I'm not currently in a voice channel.",
       });
       return;
     }
 
     if (!songQueue[guild.id] || songQueue[guild.id].length === 0) {
-      await interaction.reply({
-        embeds: [embedContructor("There's no song to skip.")],
+      await replyOrFollowUpEmbed(interaction, {
+        description: "There's no song to skip.",
       });
       return;
     }
@@ -35,8 +31,8 @@ export const skipMusicContent = async (interaction: CommandInteraction) => {
     songQueue[guild.id].shift();
     if (songQueue[guild.id].length > 0) {
       console.log("Skipping music and playing next song.");
-      await interaction.reply({
-        embeds: [embedContructor("Skipping music and playing next song.")],
+      await replyOrFollowUpEmbed(interaction, {
+        description: "Skipping music and playing next song.",
       });
       await playNextSong(guild, interaction).catch((e) =>
         console.error("Error playing next song:", e)
@@ -44,16 +40,14 @@ export const skipMusicContent = async (interaction: CommandInteraction) => {
     } else {
       stopSong(guild);
       console.log("No more songs in the queue.");
-      await interaction.reply({
-        embeds: [embedContructor("There are no more songs in the queue.")],
+      await replyOrFollowUpEmbed(interaction, {
+        description: "There are no more songs in the queue.",
       });
     }
   } catch (e) {
     console.error("Error skipping music:", e);
-    await interaction.reply({
-      embeds: [
-        embedContructor("An error occurred while trying to skip music."),
-      ],
+    await replyOrFollowUpEmbed(interaction, {
+      description: "An error occurred while trying to skip music.",
     });
   }
 };

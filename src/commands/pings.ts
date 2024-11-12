@@ -1,5 +1,5 @@
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { embedContructor } from "../utils/utils.ts";
+import { embedContructor, replyOrFollowUpEmbed } from "../utils/utils.ts";
 
 export const pingCommand = new SlashCommandBuilder()
   .setName("ping")
@@ -7,8 +7,8 @@ export const pingCommand = new SlashCommandBuilder()
 
 export const pingContent = async (interaction: CommandInteraction) => {
   try {
-    await interaction.reply({
-      embeds: [embedContructor("Pong! The bot is alive!")],
+    await replyOrFollowUpEmbed(interaction, {
+      description: "Pong! The bot is alive!",
     });
   } catch (e) {
     console.error("Error running ping command:", e);

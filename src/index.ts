@@ -21,6 +21,10 @@ import {
 } from "./commands/leave_voice.js";
 import { playMusicCommand, playMusicContent } from "./commands/play_music.js";
 import { skipMusicCommand, skipMusicContent } from "./commands/skip_music.js";
+import {
+  nowPlayingCommand,
+  nowPlayingContent,
+} from "./commands/now_playing.js";
 
 // Create a new client instance
 const client = new Client({
@@ -42,6 +46,7 @@ const commandDefinitions = [
   helpCommand.toJSON(),
   playMusicCommand.toJSON(),
   skipMusicCommand.toJSON(),
+  nowPlayingCommand.toJSON(),
 ];
 
 // When the bot is ready, run this code
@@ -100,6 +105,10 @@ client.on("interactionCreate", async (interaction: Interaction) => {
 
     case "skip_music":
       await skipMusicContent(interaction);
+      break;
+
+    case "now_playing":
+      await nowPlayingContent(interaction);
       break;
 
     default:

@@ -15,7 +15,8 @@ import {
 } from "discord.js";
 
 import ytdl from "@distube/ytdl-core";
-import { embedContructor } from "../utils/utils.ts";
+import { embedContructor, replyOrFollowUpEmbed } from "../utils/utils.ts";
+import { nowPlayingContent } from "./now_playing.ts";
 
 // Queue for each guild
 export const songQueue: { [guildId: string]: string[] } = {};
@@ -64,14 +65,10 @@ export const playMusicContent = async (interaction: CommandInteraction) => {
       songQueue[guild.id].push(url);
 
       // Reply to the user
-      await interaction.reply({
-        embeds: [
-          embedContructor(
-            `Added song to the queue! Queue length: ${
-              songQueue[guild.id].length
-            }`
-          ),
-        ],
+      await replyOrFollowUpEmbed(interaction, {
+        description: `Added song to the queue! Queue length: ${
+          songQueue[guild.id].length
+        }`,
       });
 
       // Start playing if nothing is playing
@@ -79,8 +76,8 @@ export const playMusicContent = async (interaction: CommandInteraction) => {
         await playNextSong(guild, interaction);
       }
     } else {
-      await interaction.reply({
-        embeds: [embedContructor("You need to join a voice channel first!")],
+      await replyOrFollowUpEmbed(interaction, {
+        description: "You need to join a voice channel first!",
       });
     }
   } catch (e) {
@@ -118,11 +115,14 @@ export async function playNextSong(
     });
 
     player.play(resource);
+    player.on(AudioPlayerStatus.Playing, async () => {
+      await nowPlayingContent(interaction);
+    });
 
     player.on("error", async (error) => {
       console.error("Error from Audio Player:", error);
-      await interaction.reply({
-        embeds: [embedContructor("An error occured while playing song.")],
+      await replyOrFollowUpEmbed(interaction, {
+        description: "An error occured while playing song.",
       });
       songQueue[guild.id].shift();
       playNextSong(guild, interaction).catch((e) =>
@@ -138,44 +138,8 @@ export async function playNextSong(
     });
   } catch (e) {
     console.log("error playing next song", e);
-    await interaction.reply({
-      embeds: [
-        embedContructor("An error occured while trying to play next song"),
-      ],
+    await replyOrFollowUpEmbed(interaction, {
+      description: "An error occured while trying to play next song",
     });
   }
 }
-
-export const nowPlayingCommand = new SlashCommandBuilder()
-  .setName("now_playing")
-  .setDescription("Displays the currently playing song information");
-
-export const nowPlayingContent = async (interaction: CommandInteraction) => {
-  try {
-    const guildId = interaction.guild?.id;
-    if (!guildId) return;
-
-    const currentSong = songQueue[guildId]?.[0];
-    if (currentSong) {
-      // Fetch song details (like title) using ytdl
-      const info = await ytdl.getBasicInfo(currentSong);
-      const title = info.videoDetails.title;
-      const author = info.videoDetails.author.name;
-
-      await interaction.reply({
-        embeds: [embedContructor(`Now playing: **${title}** by **${author}**`)],
-      });
-    } else {
-      await interaction.reply({
-        embeds: [embedContructor("There is no song currently playing.")],
-      });
-    }
-  } catch (e) {
-    console.error("Error fetching current song info:", e);
-    await interaction.reply({
-      embeds: [
-        embedContructor("An error occurred while fetching the song info."),
-      ],
-    });
-  }
-};

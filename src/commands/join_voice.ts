@@ -9,7 +9,7 @@ import {
   GuildMember,
   SlashCommandBuilder,
 } from "discord.js";
-import { embedContructor } from "../utils/utils.ts";
+import { embedContructor, replyOrFollowUpEmbed } from "../utils/utils.ts";
 import ytdl from "@distube/ytdl-core";
 
 export const joinVoiceCommand = new SlashCommandBuilder()
@@ -44,12 +44,12 @@ export const joinVoiceContent = async (interaction: CommandInteraction) => {
 
       player.play(resource); */
 
-      await interaction.reply({
-        embeds: [embedContructor("Joined the voice channel!")],
+      await replyOrFollowUpEmbed(interaction, {
+        description: "Joined the voice channel!",
       });
     } else {
-      await interaction.reply({
-        embeds: [embedContructor("You need to join a voice channel first!")],
+      await replyOrFollowUpEmbed(interaction, {
+        description: "You need to join a voice channel first!",
       });
     }
   } catch (e) {

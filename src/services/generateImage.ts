@@ -1,13 +1,12 @@
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
 import OpenAI from "openai";
-require("dotenv").config();
+import dotenv from 'dotenv';
+dotenv.config();
 
 const openai = new OpenAI({
-  apiKey: process.env.OPEN_AI_TOKEN || "",
+  apiKey: process.env.OPEN_AI_TOKEN ?? "",
 });
 
-export const gptGenerateImage = async (prompt) => {
+export const gptGenerateImage = async (prompt: string) => {
   try {
     const response = await openai.images.generate({
       model: "dall-e-3",

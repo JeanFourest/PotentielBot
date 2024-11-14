@@ -25,6 +25,15 @@ import {
   nowPlayingCommand,
   nowPlayingContent,
 } from "./commands/now_playing.js";
+import { loopQueueCommand, loopQueueContent } from "./commands/loop_queue.js";
+import {
+  PauseMusicCommand,
+  PauseMusicContent,
+} from "./commands/pause_music.js";
+import {
+  UnpauseMusicCommand,
+  UnpauseMusicContent,
+} from "./commands/unpause_music.js";
 
 // Create a new client instance
 const client = new Client({
@@ -47,6 +56,9 @@ const commandDefinitions = [
   playMusicCommand.toJSON(),
   skipMusicCommand.toJSON(),
   nowPlayingCommand.toJSON(),
+  loopQueueCommand.toJSON(),
+  PauseMusicCommand.toJSON(),
+  UnpauseMusicCommand.toJSON(),
 ];
 
 // When the bot is ready, run this code
@@ -109,6 +121,18 @@ client.on("interactionCreate", async (interaction: Interaction) => {
 
     case "now_playing":
       await nowPlayingContent(interaction);
+      break;
+
+    case "loop_queue":
+      await loopQueueContent(interaction);
+      break;
+
+    case "pause_music":
+      await PauseMusicContent(interaction);
+      break;
+
+    case "unpause_music":
+      await UnpauseMusicContent(interaction);
       break;
 
     default:

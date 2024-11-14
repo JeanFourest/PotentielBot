@@ -1,7 +1,8 @@
 import { CommandInteraction, Guild, SlashCommandBuilder } from "discord.js";
 import { embedContructor, replyOrFollowUpEmbed } from "../utils/utils.ts";
 import { getVoiceConnection } from "@discordjs/voice";
-import { playNextSong, songQueue } from "./play_music.ts";
+import { playNextSong } from "./play_music.ts";
+import { loop, songQueue } from "../states/states.ts";
 
 export const skipMusicCommand = new SlashCommandBuilder()
   .setName("skip_music")
@@ -28,11 +29,17 @@ export const skipMusicContent = async (interaction: CommandInteraction) => {
     }
 
     // Remove the current song and play the next if available
-    songQueue[guild.id].shift();
+    if (songQueue[guild.id]?.length && !loop[guild.id]) {
+      songQueue[guild.id].shift();
+    } else {
+      songQueue[guild.id].push(songQueue[guild.id][0]);
+      songQueue[guild.id].shift();
+    }
+
     if (songQueue[guild.id].length > 0) {
-      console.log("Skipping music and playing next song.");
+      console.log("Skipping song and playing next song.");
       await replyOrFollowUpEmbed(interaction, {
-        description: "Skipping music and playing next song.",
+        description: "Skipping song and playing next song.",
       });
       await playNextSong(guild, interaction).catch((e) =>
         console.error("Error playing next song:", e)

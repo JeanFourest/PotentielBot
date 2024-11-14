@@ -1,7 +1,7 @@
 import { getVoiceConnection } from "@discordjs/voice";
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
 import { embedContructor, replyOrFollowUpEmbed } from "../utils/utils.ts";
-import { songQueue } from "./play_music.ts";
+import { songQueue } from "../states/states.ts";
 
 export const leaveVoiceCommand = new SlashCommandBuilder()
   .setName("leave_voice")

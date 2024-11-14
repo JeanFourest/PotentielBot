@@ -15,11 +15,9 @@ import {
 } from "discord.js";
 
 import ytdl from "@distube/ytdl-core";
-import { embedContructor, replyOrFollowUpEmbed } from "../utils/utils.ts";
+import { replyOrFollowUpEmbed } from "../utils/utils.ts";
 import { nowPlayingContent } from "./now_playing.ts";
-
-// Queue for each guild
-export const songQueue: { [guildId: string]: string[] } = {};
+import { audioPlayer, loop, songQueue } from "../states/states.ts";
 
 export const playMusicCommand = new SlashCommandBuilder()
   .setName("play")
@@ -57,8 +55,9 @@ export const playMusicContent = async (interaction: CommandInteraction) => {
       }
 
       // Initialize queue if it doesn't exist
-      if (!songQueue[guild.id]) {
+      if (!songQueue[guild.id] || !loop[guild.id]) {
         songQueue[guild.id] = [];
+        loop[guild.id] = false;
       }
 
       // Add song to the queue
@@ -100,10 +99,21 @@ export async function playNextSong(
     const player = createAudioPlayer();
     connection.subscribe(player);
 
-    const stream = ytdl(url, { filter: "audioonly" });
+    const stream = ytdl(url, {
+      filter: "audioonly",
+      highWaterMark: 1 << 18,
+      dlChunkSize: 0,
+      quality: "highestaudio",
+    });
+
     stream.on("error", async (err) => {
       // Attempt to play the next song
-      if (songQueue[guild.id]?.length) songQueue[guild.id].shift();
+      if (songQueue[guild.id]?.length && !loop[guild.id]) {
+        songQueue[guild.id].shift();
+      } else {
+        songQueue[guild.id].push(songQueue[guild.id][0]);
+        songQueue[guild.id].shift();
+      }
 
       await playNextSong(guild, interaction).catch((e) =>
         console.error("Error playing next song:", e)
@@ -115,6 +125,8 @@ export async function playNextSong(
     });
 
     player.play(resource);
+    audioPlayer[guild.id] = player;
+
     player.on(AudioPlayerStatus.Playing, async () => {
       await nowPlayingContent(interaction);
     });
@@ -124,7 +136,12 @@ export async function playNextSong(
       await replyOrFollowUpEmbed(interaction, {
         description: "An error occured while playing song.",
       });
-      songQueue[guild.id].shift();
+      if (songQueue[guild.id]?.length && !loop[guild.id]) {
+        songQueue[guild.id].shift();
+      } else {
+        songQueue[guild.id].push(songQueue[guild.id][0]);
+        songQueue[guild.id].shift();
+      }
       playNextSong(guild, interaction).catch((e) =>
         console.error("Error playing next song:", e)
       );
@@ -132,7 +149,12 @@ export async function playNextSong(
 
     player.on("stateChange", async (oldState, newState) => {
       if (newState.status === AudioPlayerStatus.Idle) {
-        songQueue[guild.id].shift();
+        if (songQueue[guild.id]?.length && !loop[guild.id]) {
+          songQueue[guild.id].shift();
+        } else {
+          songQueue[guild.id].push(songQueue[guild.id][0]);
+          songQueue[guild.id].shift();
+        }
         await playNextSong(guild, interaction);
       }
     });

@@ -1,5 +1,5 @@
+import { songQueue } from "../states/states.ts";
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { songQueue } from "./play_music.ts";
 import ytdl from "@distube/ytdl-core";
 import { embedContructor, replyOrFollowUpEmbed } from "../utils/utils.ts";
 

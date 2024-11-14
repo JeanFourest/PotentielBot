@@ -1,6 +1,5 @@
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
 import { gptGenerateImage } from "../services/generateImage.js";
-import { embedContructor } from "../messages/gptMessage.js";
 
 export const createImageCommand = new SlashCommandBuilder()
   .setName("create_image")
@@ -23,8 +22,5 @@ export const createImageContent = async (interaction: CommandInteraction) => {
     await interaction.editReply(imageUrl);
   } catch (e) {
     console.error("Error generating image:", e);
-    await interaction.editReply({
-      embeds: [embedContructor("There was an error generating the image.")],
-    });
   }
 };

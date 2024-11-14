@@ -1,5 +1,6 @@
-import { Client, EmbedBuilder, Message } from "discord.js";
+import { Client, Message } from "discord.js";
 import { gptCompletion } from "../services/openai.js";
+import { embedContructor, replyOrFollowUpEmbed } from "../utils/utils.ts";
 
 export const gptMessage = async (message: Message, client: Client) => {
   try {
@@ -27,28 +28,18 @@ export const gptMessage = async (message: Message, client: Client) => {
         if (!gptResponses) return;
 
         gptResponses.forEach(async (parts) => {
-          await message.reply({
-            embeds: [embedContructor(parts)],
-          });
+          await replyOrFollowUpEmbed(message, { description: parts });
         });
       } else {
-        await message.reply({
-          embeds: [embedContructor("Hello! What would you like to ask?")],
+        await replyOrFollowUpEmbed(message, {
+          description: "Hello! What would you like to ask?",
         });
       }
     }
   } catch (e) {
     console.error("Error with gptMessage", e);
-    await message.reply({
-      embeds: [
-        embedContructor(
-          "An error occurred while trying to interact with Potentiel."
-        ),
-      ],
+    await replyOrFollowUpEmbed(message, {
+      description: "An error occurred while trying to interact with Potentiel.",
     });
   }
-};
-
-export const embedContructor = (description: string) => {
-  return new EmbedBuilder().setDescription(description).setTimestamp();
 };

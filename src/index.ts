@@ -19,6 +19,21 @@ import {
   leaveVoiceCommand,
   leaveVoiceContent,
 } from "./commands/leave_voice.js";
+import { playMusicCommand, playMusicContent } from "./commands/play_music.js";
+import { skipMusicCommand, skipMusicContent } from "./commands/skip_music.js";
+import {
+  nowPlayingCommand,
+  nowPlayingContent,
+} from "./commands/now_playing.js";
+import { loopQueueCommand, loopQueueContent } from "./commands/loop_queue.js";
+import {
+  PauseMusicCommand,
+  PauseMusicContent,
+} from "./commands/pause_music.js";
+import {
+  UnpauseMusicCommand,
+  UnpauseMusicContent,
+} from "./commands/unpause_music.js";
 
 // Create a new client instance
 const client = new Client({
@@ -38,6 +53,12 @@ const commandDefinitions = [
   joinVoiceCommand.toJSON(),
   leaveVoiceCommand.toJSON(),
   helpCommand.toJSON(),
+  playMusicCommand.toJSON(),
+  skipMusicCommand.toJSON(),
+  nowPlayingCommand.toJSON(),
+  loopQueueCommand.toJSON(),
+  PauseMusicCommand.toJSON(),
+  UnpauseMusicCommand.toJSON(),
 ];
 
 // When the bot is ready, run this code
@@ -49,7 +70,11 @@ client.once("ready", async () => {
   let commands: any;
   try {
     if (!client.application) return;
-    commands = await client.application.commands.set(commandDefinitions);
+    // remove guild id to deploy globally
+    commands = await client.application.commands.set(
+      commandDefinitions,
+      "748973182651859015"
+    );
   } catch (e) {
     console.error(e);
   }
@@ -80,12 +105,38 @@ client.on("interactionCreate", async (interaction: Interaction) => {
 
     case "leave_voice":
       await leaveVoiceContent(interaction);
+      break;
+
+    case "play":
+      await playMusicContent(interaction);
+      break;
 
     case "help":
       await helpContent(interaction, client);
       break;
 
+    case "skip_music":
+      await skipMusicContent(interaction);
+      break;
+
+    case "now_playing":
+      await nowPlayingContent(interaction);
+      break;
+
+    case "loop_queue":
+      await loopQueueContent(interaction);
+      break;
+
+    case "pause_music":
+      await PauseMusicContent(interaction);
+      break;
+
+    case "unpause_music":
+      await UnpauseMusicContent(interaction);
+      break;
+
     default:
+      console.log("Command not recognized.");
       break;
   }
 });

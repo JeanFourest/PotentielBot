@@ -1,5 +1,5 @@
 import { Client, CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { embedContructor } from "../messages/gptMessage.js";
+import { embedContructor, replyOrFollowUpEmbed } from "../utils/utils.ts";
 
 export const helpCommand = new SlashCommandBuilder()
   .setName("help")
@@ -17,15 +17,10 @@ export const helpContent = async (
       .map((command) => `/${command.name}`)
       .join("\n");
 
-    await interaction.reply({
-      embeds: [embedContructor(`Available commands:\n${commandList}`)],
+    await replyOrFollowUpEmbed(interaction, {
+      description: `Available commands:\n${commandList}`,
     });
   } catch (e) {
     console.error("error running help command", e);
-    await interaction.reply({
-      embeds: [
-        embedContructor("An error occurred while trying to run help command."),
-      ],
-    });
   }
 };

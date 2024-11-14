@@ -46,6 +46,7 @@ const client = new Client({
 });
 
 const token = process.env.TOKEN ?? "";
+const discordServer = process.env.DISCORD_SERVER ?? "";
 
 const commandDefinitions = [
   pingCommand.toJSON(),
@@ -73,7 +74,7 @@ client.once("ready", async () => {
     // remove guild id to deploy globally
     commands = await client.application.commands.set(
       commandDefinitions,
-      "748973182651859015"
+      discordServer
     );
   } catch (e) {
     console.error(e);
